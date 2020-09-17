@@ -20,7 +20,7 @@ I became frustrated trying to get to the up-to-date figures for my area, so I de
 
 I have the default set to Lichtenberg (my home district) so that I just have to refresh the page to see the information I want, but I used Streamlit's [selectbox](https://docs.streamlit.io/en/stable/api.html#streamlit.selectbox) function to allow the user to choose their own district, or a calculated 'All Berlin' field. The period can be adjusted using a [slider](https://docs.streamlit.io/en/stable/api.html#streamlit.slider).
 
-I deployed the application using [Heroku](https://www.heroku.com), the Procfile, setup.sh and requirements.txt are all included in this repository.
+I deployed the [application](https://berlin-covid.herokuapp.com/) using [Heroku](https://www.heroku.com), the Procfile, setup.sh and requirements.txt are all included in this repository.
 
 
 ### Technologies used
