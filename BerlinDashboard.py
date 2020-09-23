@@ -34,7 +34,7 @@ historic_district_cases_df['All Berlin'] = historic_district_cases_df.sum(axis=1
 
 district = st.sidebar.selectbox(
     'Select District:',
-    ('Lichtenberg', 'All Berlin', 'Mitte', 'Friedrichshain-Kreuzberg', 'Neukoelln', 'Tempelhof-Schoeneberg', 'Pankow', 'Reinickendorf', 'Charlottenburg-Wilmersdorf', 'Spandau', 'Steglitz-Zehlendorf', 'Treptow-Koepenick')
+    ('Lichtenberg', 'All Berlin', 'Mitte', 'Friedrichshain-Kreuzberg', 'Charlottenburg-Wilmersdorf', 'Neukoelln', 'Tempelhof-Schoeneberg', 'Pankow', 'Reinickendorf', 'Spandau', 'Steglitz-Zehlendorf', 'Treptow-Koepenick')
 )
 
 days_to_show = st.sidebar.slider(
@@ -62,7 +62,7 @@ data_to_plot = historic_cases[['Datum', new_col_name]]
 
 
 # Creating a pandas DataFrame with the populations of the districts (populations are in units of 100,000 because that's the figure used for 7-day-incidence reporting)
-pop_dict = {'Bezirk': ['Lichtenberg', 'Mitte', 'Neukölln', 'Friedrichshain-Kreuzberg', 'Charlottenburg-Wilmersdorf', 'Tempelhof-Schöneberg', 'Pankow', 'Reinickendorf', 'Steglitz-Zehlendorf', 'Spandau', 'Marzahn-Hellersdorf', 'Treptow-Köpenick', 'All Berlin'], 
+pop_dict = {'Bezirk': ['Lichtenberg', 'Mitte', 'Neukoelln', 'Friedrichshain-Kreuzberg', 'Charlottenburg-Wilmersdorf', 'Tempelhof-Schoeneberg', 'Pankow', 'Reinickendorf', 'Steglitz-Zehlendorf', 'Spandau', 'Marzahn-Hellersdorf', 'Treptow-Koepenick', 'All Berlin'], 
             'Population': [2.91452, 3.84172, 3.29691, 2.89762, 3.42332, 3.51644, 4.07765, 2.65225, 3.08697, 2.43977, 2.68548, 2.71153, 37.54418]}
 pop_df = pd.DataFrame(data=pop_dict)
 
@@ -98,6 +98,7 @@ st.write('# %s' % district)
 
 # Plotting the 7 day incidence
 
+st.write('## 7 Day Incidence')
 st.write('This chart shows the 7 day incidence (# of cases per 100,000 inhabitants) for %s.' % district)
 
 incidence_data = incidence.iloc[-days_to_show:,:]
@@ -108,6 +109,7 @@ plt.xticks(rotation=45,
     horizontalalignment='right',
     fontweight='light',
     fontsize='small')
+plt.ylim((0))
 plt.title('Seven Day Incidence for ' + district + ' - Last ' + str(days_to_show) + ' Days', color = '0.5')
 st.pyplot(fig)
 st.table(incidence.iloc[-3:,:])
@@ -118,7 +120,7 @@ st.write('---')
 # Plotting the 7 day average
 
 
-
+st.write('## Rolling 7 Day Average')
 st.write('This chart shows a rolling 7-day-average (e.g. the value shown for 16.9.20 will be the total of all new cases from 9.9.20 - 16.9.20, divided by 7).')
 st.write('This smoothes out the spikes and makes it easier to identify the real trend in cases.')
 
@@ -140,8 +142,10 @@ st.write('---')
 
 # Plotting the new cases
 
+st.write('## New Reported Cases')
 st.write('This chart shows the raw number of new reported cases in ' + district +'.')
 st.write("This will show larger variance and generally be 'noisier' than the 7-day-average chart.")
+st.write('Notice that the numbers tend to dip to zero on weekends and spike on Mondays. This is an artifact of the data collection process and not a real trend - new cases are normally not reported over weekends.')
 
 new_cases = new_reported_cases.iloc[-days_to_show:,:]
 
