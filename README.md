@@ -22,9 +22,12 @@ I have the default set to Lichtenberg (my home district) so that I just have to 
 
 I deployed the [application](https://berlin-covid.herokuapp.com/) using [Heroku](https://www.heroku.com), the Procfile, setup.sh and requirements.txt are all included in this repository.
 
+I was invited to participate in the [Streamlit for Teams](https://www.streamlit.io/for-teams) Beta, so I also deployed the [latest version of the app](https://s4a.streamlit.io/thecraigd/berlin_covid_dashboard/master/BerlinDashboard.py/+/) there. This seems to be a little faster, as I am using the free tier on Heroku so it can take some time to 'spin up' the dynos which power the app if it hasn't been used for a while. The Streamlit for Teams solution doesn't seem to have this issue (for now).
+
 
 ### Technologies used
 * [Streamlit](https://www.streamlit.io)
+* [Streamlit for Teams](https://www.streamlit.io/for-teams)
 * [pandas](https://pandas.pydata.org/)
 * [Heroku](https://www.heroku.com)
 
