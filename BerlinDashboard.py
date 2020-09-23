@@ -34,12 +34,12 @@ historic_district_cases_df['All Berlin'] = historic_district_cases_df.sum(axis=1
 
 district = st.sidebar.selectbox(
     'Select District:',
-    ('Lichtenberg', 'Mitte', 'Friedrichshain-Kreuzberg', 'Neukoelln', 'Tempelhof-Schoeneberg', 'Pankow', 'Reinickendorf', 'Charlottenburg-Wilmersdorf', 'Spandau', 'Steglitz-Zehlendorf', 'Treptow-Koepenick', 'All Berlin')
+    ('Lichtenberg', 'All Berlin', 'Mitte', 'Friedrichshain-Kreuzberg', 'Neukoelln', 'Tempelhof-Schoeneberg', 'Pankow', 'Reinickendorf', 'Charlottenburg-Wilmersdorf', 'Spandau', 'Steglitz-Zehlendorf', 'Treptow-Koepenick')
 )
 
 days_to_show = st.sidebar.slider(
     'Number of days to display:',
-    0, 40, 10
+    0, 40, 14
 )
 
 
@@ -58,6 +58,26 @@ historic_cases[new_col_name] = seven_day_average
 # Creating a new DataFrame with the date and the 7-day-average
 data_to_plot = historic_cases[['Datum', new_col_name]]
 
+###################################
+
+
+# Creating a pandas DataFrame with the populations of the districts (populations are in units of 100,000 because that's the figure used for 7-day-incidence reporting)
+pop_dict = {'Bezirk': ['Lichtenberg', 'Mitte', 'Neukölln', 'Friedrichshain-Kreuzberg', 'Charlottenburg-Wilmersdorf', 'Tempelhof-Schöneberg', 'Pankow', 'Reinickendorf', 'Steglitz-Zehlendorf', 'Spandau', 'Marzahn-Hellersdorf', 'Treptow-Köpenick', 'All Berlin'], 
+            'Population': [2.91452, 3.84172, 3.29691, 2.89762, 3.42332, 3.51644, 4.07765, 2.65225, 3.08697, 2.43977, 2.68548, 2.71153, 37.54418]}
+pop_df = pd.DataFrame(data=pop_dict)
+
+# Creating a 7 day rolling sum of cases per district
+new_reported_cases['Seven Day Sum'] = new_reported_cases.rolling(7).sum()
+
+# Getting the population 
+poppo = pop_df.loc[pop_df['Bezirk'] == district]
+popn = float(poppo['Population'])
+
+new_reported_cases['Seven Day Incidence'] = new_reported_cases['Seven Day Sum'] / popn
+
+incidence = new_reported_cases[['Datum', 'Seven Day Incidence']]
+####################################
+
 # Selecting the style for the plots
 plt.style.use('ggplot')
 
@@ -74,7 +94,30 @@ plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
+st.write('# %s' % district)
+
+# Plotting the 7 day incidence
+
+st.write('This chart shows the 7 day incidence (# of cases per 100,000 inhabitants) for %s.' % district)
+
+incidence_data = incidence.iloc[-days_to_show:,:]
+
+fig, ax = plt.subplots()
+plt.plot(incidence_data['Datum'], incidence_data['Seven Day Incidence'])
+plt.xticks(rotation=45, 
+    horizontalalignment='right',
+    fontweight='light',
+    fontsize='small')
+plt.title('Seven Day Incidence for ' + district + ' - Last ' + str(days_to_show) + ' Days', color = '0.5')
+st.pyplot(fig)
+st.table(incidence.iloc[-3:,:])
+
+
+st.write('---')
+
 # Plotting the 7 day average
+
+
 
 st.write('This chart shows a rolling 7-day-average (e.g. the value shown for 16.9.20 will be the total of all new cases from 9.9.20 - 16.9.20, divided by 7).')
 st.write('This smoothes out the spikes and makes it easier to identify the real trend in cases.')
