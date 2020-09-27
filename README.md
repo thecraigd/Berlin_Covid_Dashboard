@@ -4,7 +4,7 @@
 [link]: https://www.craigdoesdata.de/
 
 
-# [Covid-19 Dashboard for Berlin](https://berlin-covid.herokuapp.com/)
+# [Covid-19 Dashboard for Berlin](https://s4a.streamlit.io/thecraigd/berlin_covid_dashboard/master/BerlinDashboard.py/+/)
 
 
 ![App Screenshot](https://www.craigdoesdata.de/img/berlindashboard.jpg)
