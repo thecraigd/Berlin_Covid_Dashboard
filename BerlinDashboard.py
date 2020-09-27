@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import mplcyberpunk
 
 # Title - The title and introductory text and images are all written in Markdown format here, using st.write()
 
@@ -32,15 +33,28 @@ historic_district_cases_df = get_data()
 # Adding a Total column for all Berlin
 historic_district_cases_df['All Berlin'] = historic_district_cases_df.sum(axis=1)
 
+districts = ['Lichtenberg', 'All Berlin', 'Mitte', 'Friedrichshain-Kreuzberg', 'Charlottenburg-Wilmersdorf','Neukoelln', 'Tempelhof-Schoeneberg', 'Pankow', 'Reinickendorf', 'Steglitz-Zehlendorf', 'Spandau', 'Marzahn-Hellersdorf', 'Treptow-Koepenick']
+
+
+
+# Creating a Selectbox on the sidebar to select districts
 district = st.sidebar.selectbox(
-    'Select District:',
-    ('Lichtenberg', 'All Berlin', 'Mitte', 'Friedrichshain-Kreuzberg', 'Charlottenburg-Wilmersdorf', 'Neukoelln', 'Tempelhof-Schoeneberg', 'Pankow', 'Reinickendorf', 'Spandau', 'Steglitz-Zehlendorf', 'Treptow-Koepenick')
+    'Select District(s):',
+    districts
 )
 
+# Creating a slider on the sidebar to adjust dates
 days_to_show = st.sidebar.slider(
     'Number of days to display:',
     0, 40, 14
 )
+
+# Creating a Checkbox in the sidebar to turn off the mplcyberpunk style
+st.sidebar.write('---')
+st.sidebar.write('Chart Presentation Settings:')
+nocyber = st.sidebar.checkbox('Light Style')
+
+
 
 
 # Creating a pandas Series object with the rolling 7-day average for the selected district
@@ -62,7 +76,7 @@ data_to_plot = historic_cases[['Datum', new_col_name]]
 
 
 # Creating a pandas DataFrame with the populations of the districts (populations are in units of 100,000 because that's the figure used for 7-day-incidence reporting)
-pop_dict = {'Bezirk': ['Lichtenberg', 'Mitte', 'Neukoelln', 'Friedrichshain-Kreuzberg', 'Charlottenburg-Wilmersdorf', 'Tempelhof-Schoeneberg', 'Pankow', 'Reinickendorf', 'Steglitz-Zehlendorf', 'Spandau', 'Marzahn-Hellersdorf', 'Treptow-Koepenick', 'All Berlin'], 
+pop_dict = {'Bezirk': districts, 
             'Population': [2.91452, 3.84172, 3.29691, 2.89762, 3.42332, 3.51644, 4.07765, 2.65225, 3.08697, 2.43977, 2.68548, 2.71153, 37.54418]}
 pop_df = pd.DataFrame(data=pop_dict)
 
@@ -79,7 +93,10 @@ incidence = new_reported_cases[['Datum', 'Seven Day Incidence']]
 ####################################
 
 # Selecting the style for the plots
-plt.style.use('ggplot')
+if nocyber == False:
+    plt.style.use('cyberpunk')
+else:
+    plt.style.use('ggplot')
 
 # Font Size Control
 SMALL_SIZE = 8
@@ -107,10 +124,18 @@ fig, ax = plt.subplots()
 plt.plot(incidence_data['Datum'], incidence_data['Seven Day Incidence'])
 plt.xticks(rotation=45, 
     horizontalalignment='right',
-    fontweight='light',
-    fontsize='small')
+    fontweight='normal',
+    fontsize='small',
+    color= '1')
+plt.yticks(color = '1')
 plt.ylim((0))
-plt.title('Seven Day Incidence for ' + district + ' - Last ' + str(days_to_show) + ' Days', color = '0.5')
+plt.title('Seven Day Incidence for ' + district + ' - Last ' + str(days_to_show) + ' Days', color = '1')
+
+# Removing the mplcyberpunk glow effects if checkbox selected
+if nocyber == False:
+    mplcyberpunk.add_glow_effects()
+
+# Displaying the plot and the last 3 days' values
 st.pyplot(fig)
 st.table(incidence.iloc[-3:,:])
 
@@ -131,8 +156,16 @@ plt.plot(data['Datum'], data[new_col_name])
 plt.xticks(rotation=45, 
     horizontalalignment='right',
     fontweight='light',
-    fontsize='small')
-plt.title('Rolling ' + new_col_name + ' - Last ' + str(days_to_show) + ' Days', color = '0.5')
+    fontsize='small',
+    color= '1')
+plt.yticks(color = '1')
+plt.title('Rolling ' + new_col_name + ' - Last ' + str(days_to_show) + ' Days', color = '1')
+
+# Removing the mplcyberpunk glow effects if checkbox selected
+if nocyber == False:
+    mplcyberpunk.add_glow_effects()
+
+# Displaying the plot and the last 3 days' values
 st.pyplot(fig)
 st.table(data_to_plot.iloc[-3:,:])
 
@@ -154,10 +187,18 @@ plt.plot(new_cases['Datum'], new_cases[district])
 plt.xticks(rotation=45, 
     horizontalalignment='right',
     fontweight='light',
-    fontsize='small')
-plt.title('New Cases in ' + district + ' - Last ' + str(days_to_show) + ' Days', color='0.5')
+    fontsize='small',
+    color= '1')
+plt.yticks(color = '1')
+plt.title('New Cases in ' + district + ' - Last ' + str(days_to_show) + ' Days', color='1')
+
+# Removing the mplcyberpunk glow effects if checkbox selected
+if nocyber == False:
+    mplcyberpunk.add_glow_effects()
+
+# Displaying the plot and the last 3 days' values
 st.pyplot(fig)
-st.table(new_reported_cases.iloc[-3:,:])
+st.table(new_reported_cases.iloc[-3:,:2])
 
 st.write('---')
 
