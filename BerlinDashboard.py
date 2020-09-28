@@ -4,23 +4,26 @@ import matplotlib.pyplot as plt
 import mplcyberpunk
 
 # Title - The title and introductory text and images are all written in Markdown format here, using st.write()
+st.title('Berlin Covid-19 Dashboard')
 
 st.write("""
 [![craigdoesdata logo][logo]][link]
 [logo]: https://www.craigdoesdata.de/img/logo/logo_w_sm.gif
 [link]: https://www.craigdoesdata.de/
 
-# Berlin Covid-19 Dashboard
 
 ------------
 
-This dashboard provides daily updates of the number of new Covid-19 cases, as well as the rolling 7-day-average number of new cases, in the selected district of Berlin (or in the whole city).
+This dashboard provides daily updates of the 7-day-incidence (number of cases per 100,000 inhabitants), the rolling 7-day-average number of new cases and the raw number of new reported Covid-19 cases. You may select the districts to view and compare.
 
 The data are the latest official figures provided by the Berlin government, sourced from [berlin.de](https://www.berlin.de/lageso/gesundheit/infektionsepidemiologie-infektionsschutz/corona/tabelle-bezirke-gesamtuebersicht/).
 
 If you are viewing this on a mobile device, tap **>** in the top left corner to select district and timescale.
 """)
 st.write("---")
+
+####################################
+# Getting Data
 
 def get_data():
     historic_district_cases_url = 'https://www.berlin.de/lageso/_assets/gesundheit/publikationen/corona/meldedatum_bezirk.csv'
@@ -33,15 +36,28 @@ historic_district_cases_df = get_data()
 # Adding a Total column for all Berlin
 historic_district_cases_df['All Berlin'] = historic_district_cases_df.sum(axis=1)
 
-districts = ['Lichtenberg', 'All Berlin', 'Mitte', 'Friedrichshain-Kreuzberg', 'Charlottenburg-Wilmersdorf','Neukoelln', 'Tempelhof-Schoeneberg', 'Pankow', 'Reinickendorf', 'Steglitz-Zehlendorf', 'Spandau', 'Marzahn-Hellersdorf', 'Treptow-Koepenick']
+# Defining a list with the districts of Berlin, ensuring consistency of ordering and spelling, and a list with the corresponding populations
+districts = ['Lichtenberg', 'All Berlin', 'Mitte', 'Charlottenburg-Wilmersdorf', 'Friedrichshain-Kreuzberg', 'Neukoelln', 'Tempelhof-Schoeneberg', 'Pankow', 'Reinickendorf', 'Steglitz-Zehlendorf', 'Spandau', 'Marzahn-Hellersdorf', 'Treptow-Koepenick']
+populations = [2.91452, 37.54418, 3.84172, 3.42332, 2.89762, 3.29691, 3.51644, 4.07765, 2.65225, 3.08697, 2.43977, 2.68548, 2.71153]
+
+# Creating a pandas DataFrame with the populations of the districts
+pop_dict = {'Bezirk': districts, 
+            'Population': populations}
+pop_df = pd.DataFrame(data=pop_dict)
 
 
+####################################
+# Sidebar for User Input
 
-# Creating a Selectbox on the sidebar to select districts
-district = st.sidebar.selectbox(
+# Creating a multi-select box to allow multiple districts to be compared
+selected_districts = st.sidebar.multiselect(
     'Select District(s):',
-    districts
+    districts,
+    default=['Lichtenberg']   # setting Lichtenberg as the default district as it's the one I'm most interested in seeing
 )
+
+if selected_districts == []:
+    selected_districts = ['All Berlin']
 
 # Creating a slider on the sidebar to adjust dates
 days_to_show = st.sidebar.slider(
@@ -55,42 +71,49 @@ st.sidebar.write('Chart Presentation Settings:')
 nocyber = st.sidebar.checkbox('Light Style')
 
 
-
-
-# Creating a pandas Series object with the rolling 7-day average for the selected district
-seven_day_average = historic_district_cases_df.rolling(window=7)[district].mean()
+####################################
+# Manipulating Data based on User Input
 
 # This is the simple metric of new reported cases on each day
-new_reported_cases = historic_district_cases_df[['Datum', district]]
+new_reported_cases = historic_district_cases_df['Datum']
+
+# Adding a new column for each district selected by the user
+for i in selected_districts:
+    new_reported_cases = pd.concat([new_reported_cases, historic_district_cases_df[i]], axis = 1)
 
 
-# Adding the new 7-day-average column for the selected district to the existing dataframe
-new_col_name = ('7 Day Average for %s' % district)
-historic_cases = historic_district_cases_df
-historic_cases[new_col_name] = seven_day_average
+# Adding a  7-day-average column for the selected district to the existing dataframe
+data_to_plot = historic_district_cases_df['Datum']
 
-# Creating a new DataFrame with the date and the 7-day-average
-data_to_plot = historic_cases[['Datum', new_col_name]]
+for i in selected_districts:
+    seven_day_average = historic_district_cases_df.rolling(window=7)[i].mean()
+    new_col_name = ('7 Day Average for %s' % i)
+    historic_cases = historic_district_cases_df
+    historic_cases[new_col_name] = seven_day_average
+    data_to_plot = pd.concat([data_to_plot, historic_cases[new_col_name]], axis = 1)
 
-###################################
-
-
-# Creating a pandas DataFrame with the populations of the districts (populations are in units of 100,000 because that's the figure used for 7-day-incidence reporting)
-pop_dict = {'Bezirk': districts, 
-            'Population': [2.91452, 3.84172, 3.29691, 2.89762, 3.42332, 3.51644, 4.07765, 2.65225, 3.08697, 2.43977, 2.68548, 2.71153, 37.54418]}
-pop_df = pd.DataFrame(data=pop_dict)
 
 # Creating a 7 day rolling sum of cases per district
-new_reported_cases['Seven Day Sum'] = new_reported_cases.rolling(7).sum()
+for i in selected_districts:
+    new_reported_cases['Seven Day Sum for %s' % i] = new_reported_cases[i].rolling(7).sum()
 
-# Getting the population 
-poppo = pop_df.loc[pop_df['Bezirk'] == district]
-popn = float(poppo['Population'])
+# Getting the population for the selected districts, using that to calculate the 7-day-incidence
+for i in selected_districts:
+    poppo = pop_df.loc[pop_df['Bezirk'] == i]
+    popn = float(poppo['Population'])
+    new_reported_cases['Seven Day Incidence for %s' % i] = new_reported_cases['Seven Day Sum for %s' % i] / popn
 
-new_reported_cases['Seven Day Incidence'] = new_reported_cases['Seven Day Sum'] / popn
 
-incidence = new_reported_cases[['Datum', 'Seven Day Incidence']]
+# Creating a DataFrame containing only the 7-day-incidence data
+incidence = new_reported_cases['Datum']
+
+for i in selected_districts:
+    incidence = pd.concat([incidence, new_reported_cases['Seven Day Incidence for %s' % i]], axis = 1)
+
+
 ####################################
+# Output - Producing the plots
+
 
 # Selecting the style for the plots
 if nocyber == False:
@@ -98,30 +121,20 @@ if nocyber == False:
 else:
     plt.style.use('ggplot')
 
-# Font Size Control
-SMALL_SIZE = 8
-MEDIUM_SIZE = 10
-BIGGER_SIZE = 12
-
-plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=BIGGER_SIZE)    # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
-plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-
-st.write('# %s' % district)
 
 # Plotting the 7 day incidence
-
 st.write('## 7 Day Incidence')
-st.write('This chart shows the 7 day incidence (# of cases per 100,000 inhabitants) for %s.' % district)
+st.write('This chart shows the 7 day incidence (# of cases per 100,000 inhabitants) for the selected district(s)')
 
 incidence_data = incidence.iloc[-days_to_show:,:]
 
+# Defining the 7-day incidence figure 
 fig, ax = plt.subplots()
-plt.plot(incidence_data['Datum'], incidence_data['Seven Day Incidence'])
+
+for i in selected_districts: # looping to plot each district
+    plt.plot(incidence_data['Datum'], incidence_data['Seven Day Incidence for %s' % i])
+
+ax.legend(selected_districts)
 plt.xticks(rotation=45, 
     horizontalalignment='right',
     fontweight='normal',
@@ -129,46 +142,56 @@ plt.xticks(rotation=45,
     color= '1')
 plt.yticks(color = '1')
 plt.ylim((0))
-plt.title('Seven Day Incidence for ' + district + ' - Last ' + str(days_to_show) + ' Days', color = '1')
+plt.title('Seven Day Incidence - Last ' + str(days_to_show) + ' Days', color = '1')
 
 # Removing the mplcyberpunk glow effects if checkbox selected
 if nocyber == False:
     mplcyberpunk.add_glow_effects()
+else:
+    # fig.patch.set_facecolor('gray')
+    legend = plt.legend(selected_districts)
+    plt.setp(legend.get_texts(), color='k')
 
 # Displaying the plot and the last 3 days' values
 st.pyplot(fig)
 st.table(incidence.iloc[-3:,:])
 
-
 st.write('---')
+
 
 # Plotting the 7 day average
 
-
 st.write('## Rolling 7 Day Average')
-st.write('This chart shows a rolling 7-day-average (e.g. the value shown for 16.9.20 will be the total of all new cases from 9.9.20 - 16.9.20, divided by 7).')
+st.write('This chart shows a [rolling 7-day-average](https://en.wikipedia.org/wiki/Moving_average) for the selected district(s).')
 st.write('This smoothes out the spikes and makes it easier to identify the real trend in cases.')
 
 data = data_to_plot.iloc[-days_to_show:,:]
 
+# Defining the figure 
 fig, ax = plt.subplots()
-plt.plot(data['Datum'], data[new_col_name])
+
+for i in selected_districts: # looping to plot each district
+    plt.plot(data['Datum'], data['7 Day Average for %s' % i])
+
+ax.legend(selected_districts)
 plt.xticks(rotation=45, 
     horizontalalignment='right',
     fontweight='light',
     fontsize='small',
     color= '1')
 plt.yticks(color = '1')
-plt.title('Rolling ' + new_col_name + ' - Last ' + str(days_to_show) + ' Days', color = '1')
+plt.title('Rolling 7-day-average - Last ' + str(days_to_show) + ' Days', color = '1')
 
 # Removing the mplcyberpunk glow effects if checkbox selected
 if nocyber == False:
     mplcyberpunk.add_glow_effects()
+else:
+    legend = plt.legend(selected_districts)
+    plt.setp(legend.get_texts(), color='k')
 
 # Displaying the plot and the last 3 days' values
 st.pyplot(fig)
 st.table(data_to_plot.iloc[-3:,:])
-
 
 st.write('---')
 
@@ -176,29 +199,38 @@ st.write('---')
 # Plotting the new cases
 
 st.write('## New Reported Cases')
-st.write('This chart shows the raw number of new reported cases in ' + district +'.')
+st.write('This chart shows the raw number of new reported cases in the selected district(s).')
 st.write("This will show larger variance and generally be 'noisier' than the 7-day-average chart.")
 st.write('Notice that the numbers tend to dip to zero on weekends and spike on Mondays. This is an artifact of the data collection process and not a real trend - new cases are normally not reported over weekends.')
 
 new_cases = new_reported_cases.iloc[-days_to_show:,:]
 
+# Defining the figure 
 fig, ax = plt.subplots()
-plt.plot(new_cases['Datum'], new_cases[district])
+
+for i in selected_districts:
+    plt.plot(new_cases['Datum'], new_cases[i])
+
+ax.legend(selected_districts)
 plt.xticks(rotation=45, 
     horizontalalignment='right',
     fontweight='light',
     fontsize='small',
     color= '1')
 plt.yticks(color = '1')
-plt.title('New Cases in ' + district + ' - Last ' + str(days_to_show) + ' Days', color='1')
+plt.title('New Reported Cases - Last ' + str(days_to_show) + ' Days', color='1')
 
 # Removing the mplcyberpunk glow effects if checkbox selected
 if nocyber == False:
     mplcyberpunk.add_glow_effects()
+else:
+    legend = plt.legend(selected_districts)
+    plt.setp(legend.get_texts(), color='k')
 
 # Displaying the plot and the last 3 days' values
 st.pyplot(fig)
-st.table(new_reported_cases.iloc[-3:,:2])
+number_to_limit_table = len(selected_districts) + 1 # This is just a hack to display the figures I want
+st.table(new_reported_cases.iloc[-3:,:number_to_limit_table])
 
 st.write('---')
 
