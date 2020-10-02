@@ -57,7 +57,7 @@ selected_districts = st.sidebar.multiselect(
 )
 
 if selected_districts == []:
-    selected_districts = ['All Berlin']
+    selected_districts = ['All Berlin'] # if all selected districts are x'd out, display data for 'All Berlin'
 
 # Creating a slider on the sidebar to adjust dates
 days_to_show = st.sidebar.slider(
@@ -161,9 +161,9 @@ st.write('---')
 
 # Plotting the 7 day average
 
-st.write('## Rolling 7 Day Average')
-st.write('This chart shows a [rolling 7-day-average](https://en.wikipedia.org/wiki/Moving_average) for the selected district(s).')
-st.write('This smoothes out the spikes and makes it easier to identify the real trend in cases.')
+st.write('## New reported cases - Rolling 7 Day Average')
+st.write('This chart shows a [rolling 7-day-average](https://en.wikipedia.org/wiki/Moving_average) of newly reported cases for the selected district(s).')
+st.write('This smoothes out the spikes somewhat and makes it easier to identify the real trend in cases.')
 
 data = data_to_plot.iloc[-days_to_show:,:]
 
@@ -201,7 +201,7 @@ st.write('---')
 st.write('## New Reported Cases')
 st.write('This chart shows the raw number of new reported cases in the selected district(s).')
 st.write("This will show larger variance and generally be 'noisier' than the 7-day-average chart.")
-st.write('Notice that the numbers tend to dip to zero on weekends and spike on Mondays. This is an artifact of the data collection process and not a real trend - new cases are normally not reported over weekends.')
+st.write('Notice that the numbers tend to dip to near zero on weekends and spike on Mondays. This is an artifact of the data collection process and not a real trend - new cases are generally not recorded / reported over weekends.')
 
 new_cases = new_reported_cases.iloc[-days_to_show:,:]
 
