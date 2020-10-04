@@ -24,6 +24,8 @@ I deployed the [application](https://berlin-covid.herokuapp.com/) using [Heroku]
 
 I was invited to participate in the [Streamlit for Teams](https://www.streamlit.io/for-teams) Beta, so I also deployed the [latest version of the app](https://s4a.streamlit.io/thecraigd/berlin_covid_dashboard/master/BerlinDashboard.py/+/) there. This seems to be a little faster, as I am using the free tier on Heroku so it can take some time to 'spin up' the dynos which power the app if it hasn't been used for a while. The Streamlit for Teams solution doesn't seem to have this issue (for now).
 
+The [application is also online](http://ec2-18-195-169-201.eu-central-1.compute.amazonaws.com:8501/) using Amazon Web Services [EC2](https://aws.amazon.com/ec2/) at [this link](http://ec2-18-195-169-201.eu-central-1.compute.amazonaws.com:8501/).
+
 
 ### Technologies used
 * [Streamlit](https://www.streamlit.io)
