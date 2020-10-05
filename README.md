@@ -32,6 +32,9 @@ The [application is also online](http://ec2-18-195-169-201.eu-central-1.compute.
 * [Streamlit for Teams](https://www.streamlit.io/for-teams)
 * [pandas](https://pandas.pydata.org/)
 * [Heroku](https://www.heroku.com)
+* [Docker](https://www.docker.com)
+* [AWS - Elastic Compute Cloud (EC2)](https://aws.amazon.com/ec2/)
+* [MPL Cyberpunk](https://github.com/dhaitz/mplcyberpunk)
 
 
 ## Contact
