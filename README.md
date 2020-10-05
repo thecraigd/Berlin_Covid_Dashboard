@@ -29,13 +29,13 @@ The [application is also online](http://ec2-18-195-169-201.eu-central-1.compute.
 
 ### Technologies used
 * [Streamlit](https://www.streamlit.io)
-* [Streamlit for Teams](https://www.streamlit.io/for-teams)
 * [pandas](https://pandas.pydata.org/)
-* [Heroku](https://www.heroku.com)
-* [Docker](https://www.docker.com)
-* [AWS - Elastic Compute Cloud (EC2)](https://aws.amazon.com/ec2/)
+* [Matplotlib](https://matplotlib.org/)
 * [MPL Cyberpunk](https://github.com/dhaitz/mplcyberpunk)
-
+* [Streamlit for Teams](https://www.streamlit.io/for-teams)
+* [Docker](https://www.docker.com)
+* [Heroku](https://www.heroku.com)
+* [AWS - Elastic Compute Cloud (EC2)](https://aws.amazon.com/ec2/)
 
 ## Contact
 All feedback is warmly received. Craig Dickson can be contacted at [craigdoesdata.de](https://www.craigdoesdata.de/contact.html).
