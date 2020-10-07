@@ -36,6 +36,9 @@ historic_district_cases_df = get_data()
 # Adding a Total column for all Berlin
 historic_district_cases_df['All Berlin'] = historic_district_cases_df.sum(axis=1)
 
+# Convert 'Datum' Column to datetime pandas format
+historic_district_cases_df['Datum'] = pd.to_datetime(historic_district_cases_df['Datum'])
+
 # Defining a list with the districts of Berlin, ensuring consistency of ordering and spelling, and a list with the corresponding populations
 districts = ['Lichtenberg', 'All Berlin', 'Mitte', 'Charlottenburg-Wilmersdorf', 'Friedrichshain-Kreuzberg', 'Neukoelln', 'Tempelhof-Schoeneberg', 'Pankow', 'Reinickendorf', 'Steglitz-Zehlendorf', 'Spandau', 'Marzahn-Hellersdorf', 'Treptow-Koepenick']
 populations = [2.91452, 37.54418, 3.84172, 3.42332, 2.89762, 3.29691, 3.51644, 4.07765, 2.65225, 3.08697, 2.43977, 2.68548, 2.71153]
