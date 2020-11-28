@@ -1,3 +1,5 @@
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/thecraigd/berlin_covid_dashboard/BerlinDashboard.py)
+
 [![CraigDoesData][logo]][link]
 
 [logo]: https://www.craigdoesdata.de/img/logo/logo.png
